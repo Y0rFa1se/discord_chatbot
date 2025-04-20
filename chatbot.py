@@ -25,7 +25,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
-streaming_chunk = dict()
+CHUNK_SIZE = int(ENV_DICT["CHUNK_SIZE"])
 
 @bot.event
 async def on_ready():
@@ -56,24 +56,27 @@ async def on_message(message):
     if message.content:
         requests = message.content
         history = render_requests(requests)
+        print(history)
         responses = gpt_request(gpt_client, MODEL, history)
 
         msg = await message.channel.send("Typing...")
         collected = ""
 
         for idx, chunk in enumerate(responses):
-            if chunk.choices[0].delta.content:
-                collected += chunk.choices[0].delta.content
-                
-                chunk_size = streaming_chunk.get(message.channel, 10)
+            try:
+                collected += chunk.delta
 
-                if idx % chunk_size == 0:
+                if idx % CHUNK_SIZE == 0:
                     try:
                         await asyncio.wait_for(msg.edit(content=collected), timeout=1)
 
                     except asyncio.TimeoutError:
                         print("Timeout error, skipping edit.")
+                        await msg.edit(content="Timeout Error")
                         continue
+
+            except Exception as e:
+                print(f"Error: {e}")
 
         await msg.edit(content=collected)
 
