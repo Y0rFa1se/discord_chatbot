@@ -10,6 +10,9 @@ def create_json(path, file):
     if not os.path.exists(path):
         os.makedirs(path)
         
+    if os.path.exists(os.path.join(path, file)):
+        return
+    
     with open(os.path.join(path, file), "w") as f:
         json.dump([], f, indent=4)
 
