@@ -25,7 +25,7 @@ gpt_client = openai_init(ENV_DICT["GPT_API"])
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
+bot = commands.Bot(command_prefix=".", intents=intents, help_command=None)
 
 CHUNK_SIZE = int(ENV_DICT["CHUNK_SIZE"])
 
