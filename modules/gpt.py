@@ -13,14 +13,24 @@ def render_requests(requests: str, history: list = []) -> dict:
 
     return history
 
-def render_image(image_url: str, history: list = []) -> dict:
+def render_image(base64_image: str, ext: str, history: list = []) -> dict:
     history.append({
         "role": "user",
         "content": [{
-            "type": "image_url",
-            "image_url": {
-                "url": image_url
-            }
+            "type": "input_image",
+            "image_url": f"data:image/{ext};base64,{base64_image}"
+        }]
+    })
+
+    return history
+
+def render_pdf(base64_pdf: str, history: list = []) -> dict:
+    history.append({
+        "role": "user",
+        "content": [{
+            "type": "input_file",
+            "filename": "file.pdf",
+            "file_data": f"data:application/pdf;base64,{base64_pdf}"
         }]
     })
 
