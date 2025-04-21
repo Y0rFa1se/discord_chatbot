@@ -7,6 +7,7 @@ import base64
 
 from modules.gpt import (
     create_json,
+    cut_session,
     openai_init,
     render_requests,
     render_image,
@@ -70,6 +71,7 @@ async def on_message(message):
                         HISTORY = json.load(f)
 
                     history = render_image(file_data, file_ext, HISTORY)
+                    history = cut_session(history)
 
                     with open(f"{HISTORY_PATH}/{message.channel.category}/{message.channel.id}.json", "w") as f:
                         json.dump(history, f, indent=4)
@@ -86,6 +88,7 @@ async def on_message(message):
                             HISTORY = json.load(f)
 
                         history = render_pdf(file_data, HISTORY)
+                        history = cut_session(history)
 
                         with open(f"{HISTORY_PATH}/{message.channel.category}/{message.channel.id}.json", "w") as f:
                             json.dump(history, f, indent=4)
@@ -98,6 +101,7 @@ async def on_message(message):
             HISTORY = json.load(f)
 
         history = render_requests(requests, HISTORY)
+        history = cut_session(history)
         responses = gpt_request(gpt_client, MODEL, history)
 
         msg = await message.channel.send("Typing...")
@@ -105,6 +109,12 @@ async def on_message(message):
 
         for idx, chunk in enumerate(responses):
             try:
+                if len(collected) > 1000:
+                    await asyncio.wait_for(msg.edit(content=collected), timeout=30)
+
+                    msg = await message.channel.send("Typing...")
+                    collected = ""
+
                 collected += chunk.delta
 
                 if idx % CHUNK_SIZE == 0:
@@ -122,6 +132,7 @@ async def on_message(message):
         await msg.edit(content=collected)
 
         history = render_responses(collected, history)
+        history = cut_session(history)
 
         with open(f"{HISTORY_PATH}/{message.channel.category}/{message.channel.id}.json", "w") as f:
             json.dump(history, f, indent=4)

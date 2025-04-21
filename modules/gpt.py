@@ -65,4 +65,5 @@ def gpt_request(client, model, history: list = []):
 
     return completion
 
-def 
+def cut_session(history: list):
+    return history[-20:]
