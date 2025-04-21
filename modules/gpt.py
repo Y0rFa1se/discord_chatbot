@@ -1,4 +1,16 @@
 from openai import OpenAI
+import os
+import json
+
+def create_json(path, file):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        
+    if os.path.exists(os.path.join(path, file)):
+        return
+    
+    with open(os.path.join(path, file), "w") as f:
+        json.dump([], f, indent=4)
 
 def openai_init(api_key):
     client = OpenAI(api_key=api_key)
@@ -52,3 +64,5 @@ def gpt_request(client, model, history: list = []):
     )
 
     return completion
+
+def 
